@@ -52,7 +52,7 @@ class mpu6050_multiple(mpu6050):
         temp_dict = {}
         for n, ch in enumerate(self.AD0_channels):
             GPIO.output(ch, self.on_state)
-            temp_dict[n] = super().get_temp()
+            temp_dict[n] = self.get_temp()
             GPIO.output(ch, self.off_state)
         return temp_dict
 
@@ -62,7 +62,7 @@ class mpu6050_multiple(mpu6050):
 
         for ch in self.AD0_channels:
             GPIO.output(ch, self.on_state)
-            super().set_accel_range(accel_range)
+            self.set_accel_range(accel_range)
             GPIO.output(ch, self.off_state)
 
 
@@ -72,7 +72,7 @@ class mpu6050_multiple(mpu6050):
         accel_range_list = []
         for ch in self.AD0_channels:
             GPIO.output(ch, self.on_state)
-            accel_range_list.append(super().read_accel_range(raw))
+            accel_range_list.append(self.read_accel_range(raw))
             GPIO.output(ch, self.off_state)
         return accel_range_list
 
@@ -87,7 +87,7 @@ class mpu6050_multiple(mpu6050):
         accel_data_dict = {}
         for n, ch in enumerate(self.AD0_channels):
             GPIO.output(ch, self.on_state)
-            accel_data_dict[n] = super().get_accel_data(g)
+            accel_data_dict[n] = self.get_accel_data(g)
             GPIO.output(ch, self.off_state)
         return accel_data_dict
 
@@ -97,7 +97,7 @@ class mpu6050_multiple(mpu6050):
 
         for ch in self.AD0_channels:
             GPIO.output(ch, self.on_state)
-            super().set_gyro_range(gyro_range)
+            self.set_gyro_range(gyro_range)
             GPIO.output(ch, self.off_state)
 
 
@@ -107,7 +107,7 @@ class mpu6050_multiple(mpu6050):
         gyro_range_list = []
         for ch in self.AD0_channels:
             GPIO.output(ch, self.on_state)
-            gyro_range_list.append(super().read_gyro_range(raw))
+            gyro_range_list.append(self.read_gyro_range(raw))
             GPIO.output(ch, self.off_state)
         return gyro_range_list
 
@@ -122,7 +122,7 @@ class mpu6050_multiple(mpu6050):
         gyro_data_dict = {}
         for n, ch in enumerate(self.AD0_channels):
             GPIO.output(ch, self.on_state)
-            gyro_data_dict[n] = super().get_gyro_data()
+            gyro_data_dict[n] = self.get_gyro_data()
             GPIO.output(ch, self.off_state)
         return gyro_data_dict
 
@@ -133,21 +133,34 @@ class mpu6050_multiple(mpu6050):
         all_data_dict = {}
         for n, ch in enumerate(self.AD0_channels):
             GPIO.output(ch, self.on_state)
-            temp = super().get_temp()
-            accel = super().get_accel_data(g)
-            gyro = super().get_gyro_data()
+            temp = self.get_temp()
+            accel = self.get_accel_data(g)
+            gyro = self.get_gyro_data()
             all_data_dict[n] = {"Temperature":temp, "Accelerometer":accel, "Gyroscope":gyro}
             GPIO.output(ch, self.off_state)
         return all_data_dict
-        
-#TODO: return angular values from accelorometers
-"""
-    def getAngle(accelData):
-         yAngle = math.degrees(math.atan2(accelData['z'], accelData['x']))
-         xAngle = math.degrees(math.atan2(accelData['z'], accelData['y']))
-         return (xAngle, yAngle)
+
+
+    def get_accel_angle_data(self, radians=False):
+        """Transforms accelometer data to x and y angles
+        in radians or degrees"""
+
+        angle_dict = {}
+        for n, ch in enumerate(self.AD0_channels):
+            GPIO.output(ch, self.on_state)
+            accel_data = self.get_accel_data(g=True)
+
+            if radians == False:
+                yAngle = math.degrees(math.atan2(accel_data['z'], accel_data['x']))
+                xAngle = math.degrees(math.atan2(accel_data['z'], accel_data['y']))
+            else:
+                yAngle = math.atan2(accel_data['z'], accel_data['x'])
+                xAngle = math.atan2(accel_data['z'], accel_data['y'])
+           
+            angle_dict[n] = {"x":xAngle, "y":yAngle}
+            GPIO.output(ch, self.off_state)
+        return angle_dict
  
-"""
 
 if __name__ == "__main__":
     """Assuming that the address is 0x68
@@ -167,3 +180,4 @@ if __name__ == "__main__":
     print(mult_mpu.read_gyro_range_all())
     print(mult_mpu.get_gyro_data_all())
     print(mult_mpu.get_all_sensor_data())
+    print(mult_mpu.get_accel_angle_data())
