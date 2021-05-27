@@ -12,9 +12,8 @@ import RPi.GPIO as GPIO
 
 class mpu6050_multiple(mpu6050):
 
-    def __init__ (self, AD0_channels, loop_time=100, address=0x68, pinmode="BOARD"):
+    def __init__ (self, AD0_channels, address=0x68, pinmode="BOARD"):
         self.AD0_channels = AD0_channels
-        self.loop_time = loop_time
         self.address = address
         self.pinmode = pinmode
 
@@ -164,20 +163,9 @@ class mpu6050_multiple(mpu6050):
 
 if __name__ == "__main__":
     """Assuming that the address is 0x68
-    and that two MPU-6050 are connected to pin 11 and 13 of RPi""" 
+    and that two MPU-6050 are connected to pin 11 and 13 of RPi
+    prints out all sensros data as a demo""" 
+    
     channels = (11, 13)
     mult_mpu = mpu6050_multiple(channels)
-    print(mult_mpu.get_temp_all())
-    print(mult_mpu.read_accel_range_all())
-
-    mult_mpu.set_accel_range_all(0x08)
-    print(mult_mpu.read_accel_range_all())
-    print(mult_mpu.read_accel_range_all(raw=True))
-
-    print(mult_mpu.get_accel_data_all())
-    print(mult_mpu.read_gyro_range_all())
-    mult_mpu.set_gyro_range_all(0x08)
-    print(mult_mpu.read_gyro_range_all())
-    print(mult_mpu.get_gyro_data_all())
     print(mult_mpu.get_all_sensor_data())
-    print(mult_mpu.get_accel_angle_data())
